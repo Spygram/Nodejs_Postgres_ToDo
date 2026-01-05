@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  postgres_container:
+    image: postgres:16.8
+    container_name: todo_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - todo_postgres_data:/var/lib/postgresql/data
+      - ./db_schema/todo_db.sql:/docker-entrypoint-initdb.d/todo_db.sql
+
+  app_container:
+    build: .
+    container_name: todo_app
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - postgres_container
+    #volumes:
+    #  - ./public:/usr/src/app/public
+
+volumes:
+  todo_postgres_data:
